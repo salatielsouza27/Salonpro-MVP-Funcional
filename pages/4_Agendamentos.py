@@ -1,44 +1,46 @@
-horario_ocupado = pd.read_sql(
-    """
-    SELECT *
-    FROM agendamentos
-    WHERE data = ?
-      AND horario = ?
-      AND profissional = ?
-    """,
-    conn,
-    params=[str(data), horario, profissional]
-)
+if st.button("Agendar"):
 
-if len(horario_ocupado) > 0:
-    st.error(
-        f"{profissional} já possui um atendimento às {horario}."
-    )
-
-else:
-
-    conn.execute(
+    horario_ocupado = pd.read_sql(
         """
-        INSERT INTO agendamentos
-        (
-            cliente,
-            profissional,
-            servico,
-            data,
-            horario
-        )
-        VALUES
-        (?, ?, ?, ?, ?)
+        SELECT *
+        FROM agendamentos
+        WHERE data = ?
+          AND horario = ?
+          AND profissional = ?
         """,
-        (
-            cliente,
-            profissional,
-            servico,
-            str(data),
-            horario
-        )
+        conn,
+        params=[str(data), horario, profissional]
     )
 
-    conn.commit()
+    if len(horario_ocupado) > 0:
 
-    st.success("Agendamento realizado com sucesso.")
+        st.error(
+            f"{profissional} já possui um atendimento neste horário."
+        )
+
+    else:
+
+        conn.execute(
+            """
+            INSERT INTO agendamentos
+            (
+                cliente,
+                profissional,
+                servico,
+                data,
+                horario
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                cliente,
+                profissional,
+                servico,
+                str(data),
+                horario
+            )
+        )
+
+        conn.commit()
+
+        st.success("Agendamento realizado.")
